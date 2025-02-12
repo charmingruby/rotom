@@ -1,9 +1,10 @@
 name: rotom
-description: Serverless terminal-based TUI for managing budgets
+description: Serverless budget manager
 runtime:
   name: nodejs
   options:
     packagemanager: pnpm
+main: src/shared/infra/iac/
 config:
   pulumi:tags:
     value:

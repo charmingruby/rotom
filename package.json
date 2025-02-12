@@ -1,0 +1,21 @@
+{
+    "name": "rotom",
+    "scripts": {
+        "lint": "eslint --fix"
+    },
+    "devDependencies": {
+        "@types/node": "^18",
+        "eslint": "^9.20.1",
+        "globals": "^15.14.0",
+        "typescript": "^5.0.0",
+        "typescript-eslint": "^8.24.0"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^6.0.0",
+        "@pulumi/aws-apigateway": "^2.0.0",
+        "@pulumi/awsx": "^2.0.2",
+        "@pulumi/pulumi": "^3.113.0",
+        "@types/aws-lambda": "^8.10.147",
+        "aws-lambda": "^1.0.7"
+    }
+}
