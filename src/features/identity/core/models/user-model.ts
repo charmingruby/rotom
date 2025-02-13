@@ -6,4 +6,7 @@ export interface UserModel {
     birthDate: Date
     password: string
     provider: string
+    confirmedAt?: Date
+    completedAt?: Date
+    createdAt: Date
 }

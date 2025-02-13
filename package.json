@@ -11,6 +11,7 @@
         "typescript-eslint": "^8.24.0"
     },
     "dependencies": {
+        "@aws-sdk/client-cognito-identity-provider": "^3.744.0",
         "@pulumi/aws": "^6.0.0",
         "@pulumi/aws-apigateway": "^2.0.0",
         "@pulumi/awsx": "^2.0.2",
