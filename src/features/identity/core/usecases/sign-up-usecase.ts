@@ -1,12 +1,12 @@
-import { ResourceAlreadyExistsException } from "../../../../shared/core/exceptions/resource-already-exists-exeception";
-import { generateId } from "../../../../shared/core/models/id";
-import { IdentityProviderClient } from "../clients/identity-provider-client";
-import { AccountModel } from "../models/account-model";
-import { UserModel } from "../models/user-model";
-import { AccountRepository } from "../repository/account-repository";
-import { UserRepository } from "../repository/user-repository";
+import { ResourceAlreadyExistsException } from "../../../../shared/core/exceptions/resource-already-exists-exeception"
+import { generateId } from "../../../../shared/core/models/id"
+import { IdentityProviderClient } from "../clients/identity-provider-client"
+import { AccountModel } from "../models/account-model"
+import { UserModel } from "../models/user-model"
+import { AccountsRepository } from "../repository/accounts-repository"
+import { UsersRepository } from "../repository/users-repository"
 
-interface SignUpUseCaseRequest {
+export interface SignUpUseCaseRequest {
     email: string
     firstName: string
     lastName: string
@@ -15,20 +15,43 @@ interface SignUpUseCaseRequest {
     provider: string
 }
 
+export interface SignUpUseCaseResponse {
+    accountId: string
+    userId: string
+}
 
 export class SignUpUseCase {
     constructor(
         private readonly identityProviderClient: IdentityProviderClient,
-        private readonly userRepository: UserRepository,
-        private readonly accountRepository: AccountRepository,
+        private readonly usersRepository: UsersRepository,
+        private readonly accountsRepository: AccountsRepository,
     ) { }
 
-    async perform(req: SignUpUseCaseRequest): Promise<void> {
+    async perform(req: SignUpUseCaseRequest): Promise<SignUpUseCaseResponse> {
         const { email, password, firstName, lastName, birthDate, provider } = req
 
-        const accountAlreadyExistsInProvider = await this.accountRepository.findByEmailAndProvider(email, provider)
+        const accountAlreadyExistsInProvider = await this.accountsRepository.findByEmailAndProvider(email, provider)
         if (accountAlreadyExistsInProvider) {
             throw new ResourceAlreadyExistsException('account')
+        }
+
+        const userAlreadyExists = await this.usersRepository.findByEmail(email)
+        let userId: string = userAlreadyExists?.id || ''
+
+        if (!userAlreadyExists) {
+            const user: UserModel = {
+                id: generateId(),
+                birthDate,
+                email,
+                firstName,
+                lastName,
+                avatarUrl: undefined,
+                createdAt: new Date(),
+            }
+
+            await this.usersRepository.store(user)
+
+            userId = user.id
         }
 
         const userIdFromProvider = await this.identityProviderClient.signUp({
@@ -39,19 +62,10 @@ export class SignUpUseCase {
             birthDate,
         })
 
-        const user: UserModel = {
-            id: generateId(),
-            birthDate,
-            email,
-            firstName,
-            lastName,
-            avatarUrl: undefined,
-            createdAt: new Date(),
-        }
-
         const account: AccountModel = {
             id: generateId(),
-            userId: user.id,
+            email,
+            userId,
             userIdFromProvider,
             provider,
             completedAt: undefined,
@@ -59,8 +73,11 @@ export class SignUpUseCase {
             createdAt: new Date(),
         }
 
-        await this.userRepository.store(user)
+        await this.accountsRepository.store(account)
 
-        await this.accountRepository.store(account)
+        return {
+            accountId: account.id,
+            userId,
+        }
     }
 }
