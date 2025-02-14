@@ -1,5 +1,5 @@
 import { AccountModel } from "../../core/models/account-model"
-import { AccountsRepository } from "../../core/repository/accounts-repository"
+import { AccountsRepository } from "../../core/repositories/accounts-repository"
 
 export class InMemoryAccountsRepository implements AccountsRepository {
     public items: AccountModel[] = []

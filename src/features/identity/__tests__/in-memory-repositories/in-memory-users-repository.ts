@@ -1,5 +1,5 @@
 import { UserModel } from "../../core/models/user-model"
-import { UsersRepository } from "../../core/repository/users-repository"
+import { UsersRepository } from "../../core/repositories/users-repository"
 
 export class InMemoryUsersRepository implements UsersRepository {
     public items: UserModel[] = []

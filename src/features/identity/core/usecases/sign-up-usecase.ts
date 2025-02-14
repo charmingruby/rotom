@@ -3,8 +3,8 @@ import { generateId } from "../../../../shared/core/models/id"
 import { IdentityProviderClient } from "../clients/identity-provider-client"
 import { AccountModel } from "../models/account-model"
 import { UserModel } from "../models/user-model"
-import { AccountsRepository } from "../repository/accounts-repository"
-import { UsersRepository } from "../repository/users-repository"
+import { AccountsRepository } from "../repositories/accounts-repository"
+import { UsersRepository } from "../repositories/users-repository"
 
 export interface SignUpUseCaseRequest {
     email: string
