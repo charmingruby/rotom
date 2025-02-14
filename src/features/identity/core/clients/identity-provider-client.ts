@@ -1,5 +1,13 @@
+export interface SignUpParams {
+    email: string
+    firstName: string
+    lastName: string
+    birthDate: Date
+    password: string
+}
+
 export interface IdentityProviderClient {
-    signUp(email: string, password: string): Promise<void>
+    signUp(params: SignUpParams): Promise<string>
 
     signIn(email: string, password: string): Promise<void>
 

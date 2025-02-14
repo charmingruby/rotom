@@ -4,9 +4,6 @@ export interface UserModel {
     firstName: string
     lastName: string
     birthDate: Date
-    password: string
-    provider: string
-    confirmedAt?: Date
-    completedAt?: Date
+    avatarUrl?: string
     createdAt: Date
 }
