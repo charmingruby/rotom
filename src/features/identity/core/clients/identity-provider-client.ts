@@ -6,10 +6,20 @@ export interface SignUpParams {
     password: string
 }
 
+export interface SignInParams {
+    email: string
+    password: string
+}
+
+export interface SignInResult {
+    accessToken: string
+    refreshToken: string
+}
+
 export interface IdentityProviderClient {
     signUp(params: SignUpParams): Promise<string>
 
-    // signIn(email: string, password: string): Promise<void>
+    signIn(params: SignInParams): Promise<SignInResult>
 
     // confirmAccount(email: string, code: string): Promise<void>
 

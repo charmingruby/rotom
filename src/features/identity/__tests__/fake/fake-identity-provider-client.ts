@@ -1,5 +1,6 @@
 import { generateId } from "../../../../shared/core/models/id"
-import { IdentityProviderClient, SignUpParams } from "../../core/clients/identity-provider-client"
+import { IdentityProviderClient, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
+import { InvalidCredentialsException } from "../../core/exceptions/invalid-credentials-exception"
 
 interface FakeIdentityProviderAccount {
     id: string
@@ -20,6 +21,19 @@ export class FakeIdentityProviderClient implements IdentityProviderClient {
         this.items.push(account)
 
         return account.id
+    }
+
+    async signIn(params: SignInParams): Promise<SignInResult> {
+        const account = this.items.find(item => item.email === params.email && item.password === params.password)
+
+        if (!account) {
+            throw new InvalidCredentialsException()
+        }
+
+        return {
+            accessToken: 'fake-access-token',
+            refreshToken: 'fake-refresh-token',
+        }
     }
 
     clear() { this.items = [] }
