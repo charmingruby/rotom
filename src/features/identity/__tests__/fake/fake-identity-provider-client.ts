@@ -1,7 +1,8 @@
 import { generateId } from "../../../../shared/core/models/id"
-import { IdentityProviderClient, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
+import { IdentityProviderClient, RefreshSessionResult, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
 import { InvalidConfirmationCodeException } from "../../core/exceptions/invalid-confirmation-code-exception"
 import { InvalidCredentialsException } from "../../core/exceptions/invalid-credentials-exception"
+import { InvalidRefreshTokenException } from "../../core/exceptions/invalid-refresh-token-exception"
 
 interface FakeIdentityProviderAccount {
     id: string
@@ -50,6 +51,17 @@ export class FakeIdentityProviderClient implements IdentityProviderClient {
         }
 
         account.confirmed = true
+    }
+
+    async refreshSession(refreshToken: string): Promise<RefreshSessionResult> {
+        if (refreshToken !== 'valid-refresh-token') {
+            throw new InvalidRefreshTokenException()
+        }
+
+        return {
+            accessToken: 'fake-access-token',
+            refreshToken: refreshToken + '-refreshed'
+        }
     }
 
     clear() { this.items = [] }

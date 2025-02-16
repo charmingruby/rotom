@@ -16,6 +16,11 @@ export interface SignInResult {
     refreshToken: string
 }
 
+export interface RefreshSessionResult {
+    refreshToken: string
+    accessToken: string
+}
+
 export interface IdentityProviderClient {
     signUp(params: SignUpParams): Promise<string>
 
@@ -23,9 +28,9 @@ export interface IdentityProviderClient {
 
     confirmAccount(email: string, code: string): Promise<void>
 
+    refreshSession(refreshToken: string): Promise<RefreshSessionResult>
+
     // resetPassword(email: string): Promise<void>
 
     // forgotPassword(email: string, code: string, newPassword: string): Promise<void>
-
-    // refreshSession(refreshToken: string): Promise<void>
 }

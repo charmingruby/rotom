@@ -1,7 +1,7 @@
 import { DomainException } from "../../../../shared/core/exceptions/domain-exception";
 
-export class InvalidConfirmationCodeException extends DomainException {
+export class InvalidRefreshTokenException extends DomainException {
     constructor() {
-        super('invalid confirmation code')
+        super('invalid refresh token');
     }
 }
