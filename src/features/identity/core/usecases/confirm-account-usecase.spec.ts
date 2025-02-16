@@ -1,5 +1,4 @@
 import { makeAccount } from "../../__tests__/factories/make-account"
-import { makeFakeProviderItem } from "../../__tests__/factories/make-fake-provider-item"
 import { makeUser } from "../../__tests__/factories/make-user"
 import { FakeIdentityProviderClient } from "../../__tests__/fake/fake-identity-provider-client"
 import { InMemoryAccountsRepository } from "../../__tests__/in-memory-repositories/in-memory-accounts-repository"
@@ -31,7 +30,10 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const userIdFromProvider = await fakeIdentityProvider.signUp(makeFakeProviderItem({ ...user }))
+        const userIdFromProvider = await fakeIdentityProvider.signUp({
+            ...user,
+            password: 'dummy-password'
+        })
 
         const account = makeAccount({
             email: user.email,
@@ -55,7 +57,10 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const userIdFromProvider = await fakeIdentityProvider.signUp(makeFakeProviderItem({ ...user }))
+        const userIdFromProvider = await fakeIdentityProvider.signUp({
+            ...user,
+            password: 'dummy-password'
+        })
 
         const account = makeAccount({
             email: user.email,
@@ -76,7 +81,10 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const userIdFromProvider = await fakeIdentityProvider.signUp(makeFakeProviderItem({ ...user }))
+        const userIdFromProvider = await fakeIdentityProvider.signUp({
+            ...user,
+            password: 'dummy-password'
+        })
 
         const account = makeAccount({
             email: user.email,

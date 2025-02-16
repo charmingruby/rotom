@@ -1,5 +1,4 @@
 import { makeAccount } from "../../__tests__/factories/make-account"
-import { makeFakeProviderItem } from "../../__tests__/factories/make-fake-provider-item"
 import { makeUser } from "../../__tests__/factories/make-user"
 import { FakeIdentityProviderClient } from "../../__tests__/fake/fake-identity-provider-client"
 import { InMemoryAccountsRepository } from "../../__tests__/in-memory-repositories/in-memory-accounts-repository"
@@ -30,14 +29,11 @@ describe('[IDENTITY] Sign In UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const dummyPassword = "dummy-pass"
-        const userIdFromProvider = await fakeIdentityProvider.signUp(makeFakeProviderItem({
-            birthDate: user.birthDate,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            password: dummyPassword,
-        }))
+        const password = "dummy-pass"
+        const userIdFromProvider = await fakeIdentityProvider.signUp({
+            ...user,
+            password
+        })
 
         const provider = 'Cognito'
 
@@ -51,7 +47,7 @@ describe('[IDENTITY] Sign In UseCase', () => {
         const result = await sut.execute({
             provider: provider,
             email: user.email,
-            password: dummyPassword
+            password
         })
 
         expect(result).toMatchObject({
@@ -64,14 +60,11 @@ describe('[IDENTITY] Sign In UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const dummyPassword = "dummy-pass"
-        const userIdFromProvider = await fakeIdentityProvider.signUp(makeFakeProviderItem({
-            birthDate: user.birthDate,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            password: dummyPassword,
-        }))
+        const password = "dummy-pass"
+        const userIdFromProvider = await fakeIdentityProvider.signUp({
+            ...user,
+            password
+        })
 
         const provider = 'Cognito'
 
@@ -85,7 +78,7 @@ describe('[IDENTITY] Sign In UseCase', () => {
         await expect(() => sut.execute({
             provider: "Auth0",
             email: user.email,
-            password: dummyPassword
+            password
         })).rejects.toBeInstanceOf(InvalidCredentialsException)
     })
 
@@ -93,20 +86,17 @@ describe('[IDENTITY] Sign In UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const dummyPassword = "dummy-pass"
+        const password = "dummy-passpassword"
 
-        await fakeIdentityProvider.signUp(makeFakeProviderItem({
-            birthDate: user.birthDate,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            password: dummyPassword,
-        }))
+        await fakeIdentityProvider.signUp({
+            ...user,
+            password
+        })
 
         await expect(() => sut.execute({
             provider: "Cognito",
             email: user.email,
-            password: dummyPassword
+            password
         })).rejects.toBeInstanceOf(InvalidCredentialsException)
     })
 
@@ -114,14 +104,11 @@ describe('[IDENTITY] Sign In UseCase', () => {
         const user = makeUser()
         await usersRepository.store(user)
 
-        const dummyPassword = "dummy-pass"
-        const userIdFromProvider = await fakeIdentityProvider.signUp(makeFakeProviderItem({
-            birthDate: user.birthDate,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            password: dummyPassword,
-        }))
+        const password = "dummy-pass"
+        const userIdFromProvider = await fakeIdentityProvider.signUp({
+            ...user,
+            password
+        })
 
         const provider = 'Cognito'
 
@@ -135,7 +122,7 @@ describe('[IDENTITY] Sign In UseCase', () => {
         await expect(() => sut.execute({
             provider: "Cognito",
             email: user.email,
-            password: dummyPassword + "1"
+            password: password + "1"
         })).rejects.toBeInstanceOf(InvalidCredentialsException)
     })
 })
