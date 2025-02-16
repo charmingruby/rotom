@@ -21,7 +21,7 @@ export interface IdentityProviderClient {
 
     signIn(params: SignInParams): Promise<SignInResult>
 
-    // confirmAccount(email: string, code: string): Promise<void>
+    confirmAccount(email: string, code: string): Promise<void>
 
     // resetPassword(email: string): Promise<void>
 

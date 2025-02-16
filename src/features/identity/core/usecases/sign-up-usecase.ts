@@ -68,7 +68,6 @@ export class SignUpUseCase {
             userId,
             userIdFromProvider,
             provider,
-            completedAt: undefined,
             confirmedAt: undefined,
             createdAt: new Date(),
         }

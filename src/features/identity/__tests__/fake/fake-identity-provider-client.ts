@@ -1,11 +1,13 @@
 import { generateId } from "../../../../shared/core/models/id"
 import { IdentityProviderClient, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
+import { InvalidConfirmationCodeException } from "../../core/exceptions/invalid-confirmation-code-exception"
 import { InvalidCredentialsException } from "../../core/exceptions/invalid-credentials-exception"
 
 interface FakeIdentityProviderAccount {
     id: string
     email: string
     password: string
+    confirmed?: boolean
 }
 
 export class FakeIdentityProviderClient implements IdentityProviderClient {
@@ -34,6 +36,20 @@ export class FakeIdentityProviderClient implements IdentityProviderClient {
             accessToken: 'fake-access-token',
             refreshToken: 'fake-refresh-token',
         }
+    }
+
+    async confirmAccount(email: string, code: string): Promise<void> {
+        const account = this.items.find(item => item.email === email)
+        if (!account) {
+            throw new InvalidCredentialsException()
+        }
+
+        const validCode = "valid-code"
+        if (code !== validCode) {
+            throw new InvalidConfirmationCodeException()
+        }
+
+        account.confirmed = true
     }
 
     clear() { this.items = [] }

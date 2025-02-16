@@ -5,6 +5,5 @@ export interface AccountModel {
     userIdFromProvider: string
     provider: string
     confirmedAt?: Date
-    completedAt?: Date
     createdAt: Date
 }
