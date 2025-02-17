@@ -1,7 +1,8 @@
 import { BaseModel } from "@shared/core/models/base";
 import { TransactionType } from "./types/transaction-types";
+import { RecurrenceType } from "./types/recurrence-types";
 
-export interface TransactionModel extends BaseModel {
+export interface ScheduledTransactionModel extends BaseModel {
     name: string
     description: string
     relatedEntity: string // bank, person name, etc.
@@ -9,6 +10,7 @@ export interface TransactionModel extends BaseModel {
     rulesIds: string[]
     amount: number
     type: TransactionType
-    ocurredAt: Date
-    scheduledTransactionId?: string
+    recurrence: RecurrenceType
+    startDate: Date
+    endDate: Date
 }

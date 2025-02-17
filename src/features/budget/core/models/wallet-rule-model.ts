@@ -1,11 +1,13 @@
 import { BaseModel } from "@shared/core/models/base"
+import { IntervalType } from "./types/recurrence-types"
+import { RuleType, RuleUnit } from "./types/rule-types"
 
 export interface WalletRuleModel extends BaseModel {
     name: string
-    type: 'max' | 'min'
-    unit: 'flat' | 'percent'
+    type: RuleType
+    unit: RuleUnit
     amount: number
-    intervalType: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'always'
+    intervalType: IntervalType
     interval: number
     lastTriggeredAt?: Date
     walletId: string
