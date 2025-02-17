@@ -5,10 +5,10 @@ import { InMemoryAccountsRepository } from "../../__tests__/in-memory-repositori
 import { InMemoryUsersRepository } from "../../__tests__/in-memory-repositories/in-memory-users-repository"
 import { InvalidCodeException } from "../exceptions/invalid-confirmation-code-exception"
 import { InvalidCredentialsException } from "../exceptions/invalid-credentials-exception"
-import { ConfirmAccountUseCase } from "./confirm-account-usecase"
+import { ResetPasswordUseCase } from "./reset-password-usecase"
 
-describe('[IDENTITY] Confirm Account UseCase', () => {
-    let sut: ConfirmAccountUseCase
+describe('[IDENTITY] Reset Password UseCase', () => {
+    let sut: ResetPasswordUseCase
     let fakeIdentityProvider: FakeIdentityProviderClient
     let accountsRepository: InMemoryAccountsRepository
     let usersRepository: InMemoryUsersRepository
@@ -17,7 +17,7 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         accountsRepository = new InMemoryAccountsRepository()
         fakeIdentityProvider = new FakeIdentityProviderClient()
         usersRepository = new InMemoryUsersRepository()
-        sut = new ConfirmAccountUseCase(fakeIdentityProvider, accountsRepository)
+        sut = new ResetPasswordUseCase(fakeIdentityProvider, accountsRepository)
     })
 
     beforeEach(() => {
@@ -26,7 +26,7 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         fakeIdentityProvider.clear()
     })
 
-    it('should be able to confirm an account', async () => {
+    it('should be able to reset a password with a valid account', async () => {
         const user = makeUser()
         await usersRepository.store(user)
 
@@ -43,17 +43,20 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
 
         await accountsRepository.store(account)
 
-        await sut.execute({
+        const result = await sut.execute({
             provider: account.provider,
             email: user.email,
+            newPassword: "new-password",
             code: 'valid-code'
         })
 
-        const confirmedAccount = await accountsRepository.findByEmailAndProvider(user.email, account.provider)
-        expect(confirmedAccount?.confirmedAt).toBeInstanceOf(Date)
+        expect(result).toMatchObject({
+            accessToken: expect.any(String),
+            refreshToken: expect.any(String)
+        })
     })
 
-    it('should be not able to confirm an account that does not exists on provider', async () => {
+    it('should be not able to reset password on an account that does not exists on provider', async () => {
         const user = makeUser()
         await usersRepository.store(user)
 
@@ -73,11 +76,12 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         await expect(() => sut.execute({
             provider: account.provider + 'invalid',
             email: user.email,
+            newPassword: "new-password",
             code: 'valid-code'
         })).rejects.toBeInstanceOf(InvalidCredentialsException)
     })
 
-    it('should be not able to confirm an account with invalid code', async () => {
+    it('should be not able to reset password of an account with invalid code', async () => {
         const user = makeUser()
         await usersRepository.store(user)
 
@@ -97,7 +101,8 @@ describe('[IDENTITY] Confirm Account UseCase', () => {
         await expect(() => sut.execute({
             provider: account.provider,
             email: user.email,
-            code: 'not-valid-code'
+            code: 'not-valid-code',
+            newPassword: "new-password"
         })).rejects.toBeInstanceOf(InvalidCodeException)
     })
 })

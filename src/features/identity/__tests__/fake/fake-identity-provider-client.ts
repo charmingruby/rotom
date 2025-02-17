@@ -1,6 +1,6 @@
 import { generateId } from "../../../../shared/core/models/id"
-import { IdentityProviderClient, RefreshSessionResult, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
-import { InvalidConfirmationCodeException } from "../../core/exceptions/invalid-confirmation-code-exception"
+import { IdentityProviderClient, RefreshSessionResult, ResetPasswordParams, ResetPasswordResult, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
+import { InvalidCodeException } from "../../core/exceptions/invalid-confirmation-code-exception"
 import { InvalidCredentialsException } from "../../core/exceptions/invalid-credentials-exception"
 import { InvalidRefreshTokenException } from "../../core/exceptions/invalid-refresh-token-exception"
 
@@ -47,7 +47,7 @@ export class FakeIdentityProviderClient implements IdentityProviderClient {
 
         const validCode = "valid-code"
         if (code !== validCode) {
-            throw new InvalidConfirmationCodeException()
+            throw new InvalidCodeException("confirmation")
         }
 
         account.confirmed = true
@@ -61,6 +61,30 @@ export class FakeIdentityProviderClient implements IdentityProviderClient {
         return {
             accessToken: 'fake-access-token',
             refreshToken: refreshToken + '-refreshed'
+        }
+    }
+
+    async forgotPassword(email: string): Promise<void> {
+        const account = this.items.find(item => item.email === email)
+        if (!account) {
+            throw new InvalidCredentialsException()
+        }
+    }
+
+    async resetPassword(params: ResetPasswordParams): Promise<ResetPasswordResult> {
+        const account = this.items.find(item => item.email === params.email)
+
+        if (!account) {
+            throw new InvalidCredentialsException()
+        }
+
+        if (params.code !== 'valid-code') {
+            throw new InvalidCodeException("reset password")
+        }
+
+        return {
+            accessToken: 'fake-access-token',
+            refreshToken: 'fake-refresh-token',
         }
     }
 

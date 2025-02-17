@@ -1,7 +1,7 @@
 import { DomainException } from "../../../../shared/core/exceptions/domain-exception";
 
-export class InvalidConfirmationCodeException extends DomainException {
-    constructor() {
-        super('invalid confirmation code')
+export class InvalidCodeException extends DomainException {
+    constructor(codeType: string) {
+        super(`invalid ${codeType} code`)
     }
 }
