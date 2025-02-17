@@ -1,4 +1,4 @@
-import { generateId } from "../../../../shared/core/models/id"
+import { generateId } from "@shared/core/models/id"
 import { IdentityProviderClient, RefreshSessionResult, ResetPasswordParams, ResetPasswordResult, SignInParams, SignInResult, SignUpParams } from "../../core/clients/identity-provider-client"
 import { InvalidCodeException } from "../../core/exceptions/invalid-confirmation-code-exception"
 import { InvalidCredentialsException } from "../../core/exceptions/invalid-credentials-exception"

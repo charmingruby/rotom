@@ -14,5 +14,13 @@
         "types": [
             "vitest/globals"
         ],
+        "paths": {
+            "@shared/*": [
+                "./src/shared/*"
+            ],
+            "@features/*": [
+                "./src/modules/*"
+            ],
+        }
     },
 }

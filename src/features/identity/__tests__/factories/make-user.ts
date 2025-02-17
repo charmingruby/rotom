@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { generateId } from '../../../../shared/core/models/id'
+import { generateId } from '@shared/core/models/id'
 import { UserModel } from '../../core/models/user-model'
 
 export function makeUser(override: Partial<UserModel> = {}): UserModel {
@@ -11,6 +11,7 @@ export function makeUser(override: Partial<UserModel> = {}): UserModel {
         birthDate: faker.date.past(),
         email: faker.internet.email(),
         createdAt: faker.date.recent(),
+        updatedAt: undefined,
         ...override
     }
 }

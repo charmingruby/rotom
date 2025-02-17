@@ -1,5 +1,5 @@
-import { ResourceAlreadyExistsException } from "../../../../shared/core/exceptions/resource-already-exists-exeception"
-import { generateId } from "../../../../shared/core/models/id"
+import { ResourceAlreadyExistsException } from "@shared/core/exceptions/resource-already-exists-exeception"
+import { generateId } from "@shared/core/models/id"
 import { IdentityProviderClient } from "../clients/identity-provider-client"
 import { AccountModel } from "../models/account-model"
 import { UserModel } from "../models/user-model"
@@ -47,6 +47,7 @@ export class SignUpUseCase {
                 lastName,
                 avatarUrl: undefined,
                 createdAt: new Date(),
+                updatedAt: undefined
             }
 
             await this.usersRepository.store(user)
@@ -70,6 +71,7 @@ export class SignUpUseCase {
             provider,
             confirmedAt: undefined,
             createdAt: new Date(),
+            updatedAt: undefined
         }
 
         await this.accountsRepository.store(account)

@@ -1,4 +1,4 @@
-import { ResourceAlreadyExistsException } from "../../../../shared/core/exceptions/resource-already-exists-exeception"
+import { ResourceAlreadyExistsException } from "@shared/core/exceptions/resource-already-exists-exeception"
 import { makeAccount } from "../../__tests__/factories/make-account"
 import { makeUser } from "../../__tests__/factories/make-user"
 import { FakeIdentityProviderClient } from "../../__tests__/fake/fake-identity-provider-client"
