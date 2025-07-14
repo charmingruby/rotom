@@ -17,7 +17,7 @@ defmodule RotomWeb.Router do
   scope "/", RotomWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.
