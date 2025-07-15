@@ -18,6 +18,7 @@ defmodule RotomWeb.Router do
     pipe_through :browser
 
     live "/", ChatRoomLive
+    live "/rooms/:id", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.
