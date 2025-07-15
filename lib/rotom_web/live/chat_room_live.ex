@@ -72,6 +72,6 @@ defmodule RotomWeb.ChatRoomLive do
         :error -> List.first(socket.assigns.rooms)
       end
 
-    {:noreply, assign(socket, room: room)}
+    {:noreply, assign(socket, room: room, page_title: "#" <> room.name)}
   end
 end
