@@ -1,7 +1,7 @@
 defmodule RotomWeb.ChatRoomLive.Edit do
   use RotomWeb, :live_view
 
-  alias Rotom.Chat
+  alias Rotom.Chats
 
   def render(assigns) do
     ~H"""
@@ -31,9 +31,9 @@ defmodule RotomWeb.ChatRoomLive.Edit do
   end
 
   def mount(%{"id" => id}, _session, socket) do
-    room = Chat.get_room!(id)
+    room = Chats.get_room!(id)
 
-    changeset = Chat.change_room(room)
+    changeset = Chats.change_room(room)
 
     socket =
       socket
@@ -44,7 +44,7 @@ defmodule RotomWeb.ChatRoomLive.Edit do
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
-    case Chat.update_room(socket.assigns.room, room_params) do
+    case Chats.update_room(socket.assigns.room, room_params) do
       {:ok, room} ->
         {:noreply,
          socket
@@ -59,7 +59,7 @@ defmodule RotomWeb.ChatRoomLive.Edit do
   def handle_event("validate-room", %{"room" => room_params}, socket) do
     changeset =
       socket.assigns.room
-      |> Chat.change_room(room_params)
+      |> Chats.change_room(room_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}

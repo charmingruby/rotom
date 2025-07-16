@@ -1,8 +1,8 @@
 defmodule RotomWeb.ChatRoomLive do
   use RotomWeb, :live_view
 
-  alias Rotom.Chat
-  alias Rotom.Chat.Room
+  alias Rotom.Chats
+  alias Rotom.Chats.Room
 
   def render(assigns) do
     ~H"""
@@ -67,7 +67,7 @@ defmodule RotomWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
+    rooms = Chats.list_rooms()
 
     {:ok, assign(socket, rooms: rooms)}
   end
@@ -75,7 +75,7 @@ defmodule RotomWeb.ChatRoomLive do
   def handle_params(params, _uri, socket) do
     room =
       case Map.fetch(params, "id") do
-        {:ok, id} -> Chat.get_room!(id)
+        {:ok, id} -> Chats.get_room!(id)
         :error -> List.first(socket.assigns.rooms)
       end
 

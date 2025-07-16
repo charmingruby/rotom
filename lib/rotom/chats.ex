@@ -1,5 +1,5 @@
-defmodule Rotom.Chat do
-  alias Rotom.Chat.Room
+defmodule Rotom.Chats do
+  alias Rotom.Chats.Room
   alias Rotom.Repo
 
   import Ecto.Query
