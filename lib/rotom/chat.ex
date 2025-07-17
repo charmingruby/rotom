@@ -1,5 +1,6 @@
-defmodule Rotom.Chats do
-  alias Rotom.Chats.Room
+defmodule Rotom.Chat do
+  alias Rotom.Chat.Message
+  alias Rotom.Chat.Room
   alias Rotom.Repo
 
   import Ecto.Query
@@ -26,5 +27,12 @@ defmodule Rotom.Chats do
 
   def change_room(room, attrs \\ %{}) do
     Room.changeset(room, attrs)
+  end
+
+  def list_messages_in_room(%Room{id: id}) do
+    Message
+    |> where([m], m.room_id == ^id)
+    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> Repo.all()
   end
 end

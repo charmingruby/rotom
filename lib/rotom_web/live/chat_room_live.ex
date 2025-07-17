@@ -1,8 +1,8 @@
 defmodule RotomWeb.ChatRoomLive do
   use RotomWeb, :live_view
 
-  alias Rotom.Chats
-  alias Rotom.Chats.Room
+  alias Rotom.Chat
+  alias Rotom.Chat.{Message, Room}
 
   def render(assigns) do
     ~H"""
@@ -84,6 +84,28 @@ defmodule RotomWeb.ChatRoomLive do
           <% end %>
         </ul>
       </div>
+
+      <div class="flex flex-col grow overflow-auto">
+        <.message :for={message <- @messages} message={message} />
+      </div>
+    </div>
+    """
+  end
+
+  attr :message, Message, required: true
+
+  defp message(assigns) do
+    ~H"""
+    <div class="relative flex px-4 py-3">
+      <div class="h-10 w-10 rounded shrink-0 bg-slate-300"></div>
+      <div class="ml-2">
+        <div class="-mt-1">
+          <.link class="text-sm font-semibold hover:underline">
+            <span>User</span>
+          </.link>
+          <p class="text-sm">{@message.body}</p>
+        </div>
+      </div>
     </div>
     """
   end
@@ -101,7 +123,10 @@ defmodule RotomWeb.ChatRoomLive do
       patch={~p"/rooms/#{@room.id}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
-      <span class={["ml-2 leading-none", @active && "font-bold"]}>
+      <span class={[
+        "ml-2 leading-none",
+        @active && "font-bold"
+      ]}>
         {@room.name}
       </span>
     </.link>
@@ -109,7 +134,7 @@ defmodule RotomWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
-    rooms = Chats.list_rooms()
+    rooms = Chat.list_rooms()
 
     {:ok, assign(socket, rooms: rooms)}
   end
@@ -117,10 +142,18 @@ defmodule RotomWeb.ChatRoomLive do
   def handle_params(params, _uri, socket) do
     room =
       case Map.fetch(params, "id") do
-        {:ok, id} -> Chats.get_room!(id)
+        {:ok, id} -> Chat.get_room!(id)
         :error -> List.first(socket.assigns.rooms)
       end
 
-    {:noreply, assign(socket, room: room, page_title: "#" <> room.name)}
+    messages = Chat.list_messages_in_room(room)
+
+    {:noreply,
+     assign(
+       socket,
+       room: room,
+       messages: messages,
+       page_title: "#" <> room.name
+     )}
   end
 end
