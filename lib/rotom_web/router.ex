@@ -17,14 +17,6 @@ defmodule RotomWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", RotomWeb do
-    pipe_through :browser
-
-    live "/", ChatRoomLive
-    live "/rooms/:id", ChatRoomLive
-    live "/rooms/:id/edit", ChatRoomLive.Edit
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", RotomWeb do
   #   pipe_through :api
@@ -68,6 +60,9 @@ defmodule RotomWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{RotomWeb.UserAuth, :ensure_authenticated}] do
+      live "/", ChatRoomLive
+      live "/rooms/:id", ChatRoomLive
+      live "/rooms/:id/edit", ChatRoomLive.Edit
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end
