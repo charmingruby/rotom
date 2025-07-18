@@ -1,4 +1,5 @@
 defmodule Rotom.Chat do
+  alias Rotom.Accounts.User
   alias Rotom.Chat.Message
   alias Rotom.Chat.Room
   alias Rotom.Repo
@@ -45,5 +46,13 @@ defmodule Rotom.Chat do
 
   def change_message(message, attrs \\ %{}) do
     Message.changeset(message, attrs)
+  end
+
+  def delete_message_by_id(id, %User{id: user_id}) do
+    message =
+      Message
+      |> Repo.get_by!(id: id, user_id: user_id)
+
+    Repo.delete(message)
   end
 end
