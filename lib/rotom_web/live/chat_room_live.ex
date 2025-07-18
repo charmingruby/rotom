@@ -85,8 +85,8 @@ defmodule RotomWeb.ChatRoomLive do
         </ul>
       </div>
 
-      <div class="flex flex-col grow overflow-auto">
-        <.message :for={message <- @messages} message={message} />
+      <div id="room-messages" class="flex flex-col grow overflow-auto" phx-update="stream">
+        <.message :for={{dom_id, message} <- @streams.messages} dom_id={dom_id} message={message} />
       </div>
 
       <div class="h-16 bg-white pb-4">
@@ -116,11 +116,12 @@ defmodule RotomWeb.ChatRoomLive do
     """
   end
 
+  attr :dom_id, :string, required: true
   attr :message, Message, required: true
 
   defp message(assigns) do
     ~H"""
-    <div class="relative flex px-4 py-3">
+    <div id={@dom_id} class="relative flex px-4 py-3">
       <div class="h-10 w-10 rounded shrink-0 bg-slate-300"></div>
       <div class="ml-2">
         <div class="-mt-1">
@@ -176,9 +177,9 @@ defmodule RotomWeb.ChatRoomLive do
       socket
       |> assign(
         room: room,
-        messages: messages,
         page_title: "#" <> room.name
       )
+      |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{}))
 
     {:noreply, socket}
@@ -197,7 +198,7 @@ defmodule RotomWeb.ChatRoomLive do
       case Chat.create_message(current_user, room, message_params) do
         {:ok, message} ->
           socket
-          |> update(:messages, &(&1 ++ [message]))
+          |> stream_insert(:messages, message)
           |> assign_message_form(Chat.change_message(%Message{}))
 
         {:error, changeset} ->
