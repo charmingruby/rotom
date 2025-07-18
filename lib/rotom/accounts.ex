@@ -6,7 +6,7 @@ defmodule Rotom.Accounts do
   import Ecto.Query, warn: false
   alias Rotom.Repo
 
-  alias Rotom.Accounts.{User, UserToken, UserNotifier}
+  alias Rotom.Accounts.{User, UserNotifier, UserToken}
 
   ## Database getters
 
