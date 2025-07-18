@@ -89,16 +89,16 @@ defmodule RotomWeb.ChatRoomLive do
         <.message :for={message <- @messages} message={message} />
       </div>
 
-      <div class="h-12 bg-white px-4 pb-4">
+      <div class="h-16 bg-white pb-4">
         <.form
           id="new-message-form"
           for={@new_message_form}
           phx-change="validate-message"
           phx-submit="submit-message"
-          class="flex items-center border-2 border-slate-300 rounded-sm p-1 border-b-0"
+          class="flex items-center border-t border-slate-300 rounded-sm pl-2 pr-4 pl-2 pt-4 gap-2"
         >
           <textarea
-            class="grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+            class="grow text-sm px-3 py-2 border-l border-slate-300 mx-1 resize-none"
             cols=""
             id="chat-message-textarea"
             name={@new_message_form[:body].name}
@@ -106,8 +106,9 @@ defmodule RotomWeb.ChatRoomLive do
             phx-debounce
             rows="1"
           >{Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value)}</textarea>
+
           <button class="shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
-            <.icon name="hero-paper-airplane" class="h-4 w-4" />
+            <.icon name="hero-paper-airplane" class="h-6 w-6" />
           </button>
         </.form>
       </div>
