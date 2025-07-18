@@ -45,7 +45,7 @@ defmodule RotomWeb.ChatRoomLive do
         <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
           <%= if @current_user do %>
             <li class="text-[0.8125rem] leading-6 text-zinc-900">
-              {@current_user.email}
+              {username(@current_user.email)}
             </li>
             <li>
               <.link
@@ -88,6 +88,29 @@ defmodule RotomWeb.ChatRoomLive do
       <div class="flex flex-col grow overflow-auto">
         <.message :for={message <- @messages} message={message} />
       </div>
+
+      <div class="h-12 bg-white px-4 pb-4">
+        <.form
+          id="new-message-form"
+          for={@new_message_form}
+          phx-change="validate-message"
+          phx-submit="submit-message"
+          class="flex items-center border-2 border-slate-300 rounded-sm p-1 border-b-0"
+        >
+          <textarea
+            class="grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+            cols=""
+            id="chat-message-textarea"
+            name={@new_message_form[:body].name}
+            placeholder={"Message ##{@room.name}"}
+            phx-debounce
+            rows="1"
+          >{Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value)}</textarea>
+          <button class="shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
+            <.icon name="hero-paper-airplane" class="h-4 w-4" />
+          </button>
+        </.form>
+      </div>
     </div>
     """
   end
@@ -101,7 +124,7 @@ defmodule RotomWeb.ChatRoomLive do
       <div class="ml-2">
         <div class="-mt-1">
           <.link class="text-sm font-semibold hover:underline">
-            <span>User</span>
+            <span>{username(@message.user.email)}</span>
           </.link>
           <p class="text-sm">{@message.body}</p>
         </div>
@@ -148,12 +171,49 @@ defmodule RotomWeb.ChatRoomLive do
 
     messages = Chat.list_messages_in_room(room)
 
-    {:noreply,
-     assign(
-       socket,
-       room: room,
-       messages: messages,
-       page_title: "#" <> room.name
-     )}
+    socket =
+      socket
+      |> assign(
+        room: room,
+        messages: messages,
+        page_title: "#" <> room.name
+      )
+      |> assign_message_form(Chat.change_message(%Message{}))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("validate-message", %{"message" => message_params}, socket) do
+    changeset = Chat.change_message(%Message{}, message_params)
+
+    {:noreply, assign_message_form(socket, changeset)}
+  end
+
+  def handle_event("submit-message", %{"message" => message_params}, socket) do
+    %{current_user: current_user, room: room} = socket.assigns
+
+    socket =
+      case Chat.create_message(current_user, room, message_params) do
+        {:ok, message} ->
+          socket
+          |> update(:messages, &(&1 ++ [message]))
+          |> assign_message_form(Chat.change_message(%Message{}))
+
+        {:error, changeset} ->
+          assign_message_form(socket, changeset)
+      end
+
+    {:noreply, socket}
+  end
+
+  defp assign_message_form(socket, changeset) do
+    assign(socket, :new_message_form, to_form(changeset))
+  end
+
+  defp username(email) do
+    email
+    |> String.split("@")
+    |> List.first()
+    |> String.capitalize()
   end
 end

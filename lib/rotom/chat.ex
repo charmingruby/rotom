@@ -33,6 +33,17 @@ defmodule Rotom.Chat do
     Message
     |> where([m], m.room_id == ^id)
     |> order_by([m], asc: :inserted_at, asc: :id)
+    |> preload(:user)
     |> Repo.all()
+  end
+
+  def create_message(user, room, attrs) do
+    %Message{user: user, room: room}
+    |> Message.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def change_message(message, attrs \\ %{}) do
+    Message.changeset(message, attrs)
   end
 end
