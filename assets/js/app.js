@@ -21,12 +21,20 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
+import RoomMessages from "./hooks/RoomMessages";
+import ChatMessageTextarea from "./hooks/ChatMessageTextarea";
+
+const hooks = {
+  RoomMessages,
+  ChatMessageTextarea,
+};
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
+  hooks,
   params: {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     _csrf_token: csrfToken,
