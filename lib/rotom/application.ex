@@ -17,7 +17,8 @@ defmodule Rotom.Application do
       # Start a worker by calling: Rotom.Worker.start_link(arg)
       # {Rotom.Worker, arg},
       # Start to serve requests, typically the last entry
-      RotomWeb.Endpoint
+      RotomWeb.Endpoint,
+      RotomWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

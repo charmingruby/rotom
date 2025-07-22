@@ -1,6 +1,8 @@
 defmodule RotomWeb.ChatRoomLive do
+  alias RotomWeb.OnlineUsers
   use RotomWeb, :live_view
 
+  alias Rotom.Accounts
   alias Rotom.Accounts.User
   alias Rotom.Chat
   alias Rotom.Chat.{Message, Room}
@@ -21,6 +23,21 @@ defmodule RotomWeb.ChatRoomLive do
         </div>
         <div id="rooms-list">
           <.room_link :for={room <- @rooms} room={room} active={room.id == @room.id} />
+        </div>
+
+        <div class="mt-4">
+          <div class="flex items-center h-8 px-3">
+            <div class="flex items-center grow">
+              <span class="ml-2 leading-none font-medium text-sm">Users</span>
+            </div>
+          </div>
+          <div id="users-list">
+            <.user
+              :for={user <- @users}
+              user={user}
+              online={OnlineUsers.online?(@online_users, user.id)}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -46,7 +63,7 @@ defmodule RotomWeb.ChatRoomLive do
         <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
           <%= if @current_user do %>
             <li class="text-[0.8125rem] leading-6 text-zinc-900">
-              {username(@current_user.email)}
+              {username(@current_user)}
             </li>
             <li>
               <.link
@@ -151,7 +168,7 @@ defmodule RotomWeb.ChatRoomLive do
       <div class="ml-2">
         <div class="-mt-1">
           <.link class="text-sm font-semibold hover:underline">
-            <span>{username(@message.user.email)}</span>
+            <span>{username(@message.user)}</span>
           </.link>
 
           <span :if={@timezone} class="ml-1 text-xs text-gray-500">
@@ -188,12 +205,41 @@ defmodule RotomWeb.ChatRoomLive do
     """
   end
 
+  attr :user, User, required: true
+  attr :online, :boolean, default: false
+
+  defp user(assigns) do
+    ~H"""
+    <.link class="flex items-center h-8 hover:bg-gray-300 text-sm pl-8 pr-3" href="#">
+      <div class="flex justify-center w-4">
+        <%= if @online do %>
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        <% else %>
+          <span class="w-2 h-2 rounded-full border-2 border-gray-500"></span>
+        <% end %>
+      </div>
+      <span class="ml-2 leading-none">{username(@user)}</span>
+    </.link>
+    """
+  end
+
   def mount(_params, _session, socket) do
     rooms = Chat.list_rooms()
 
+    users = Accounts.list_users()
+
     timezone = get_connect_params(socket)["timezone"]
 
-    {:ok, assign(socket, rooms: rooms, timezone: timezone)}
+    if connected?(socket) do
+      OnlineUsers.track(self(), socket.assigns.current_user)
+    end
+
+    socket =
+      socket
+      |> assign(rooms: rooms, users: users, timezone: timezone)
+      |> assign(online_users: OnlineUsers.list())
+
+    {:ok, socket}
   end
 
   def handle_params(params, _uri, socket) do
@@ -266,8 +312,8 @@ defmodule RotomWeb.ChatRoomLive do
     assign(socket, :new_message_form, to_form(changeset))
   end
 
-  defp username(email) do
-    email
+  defp username(user) do
+    user.email
     |> String.split("@")
     |> List.first()
     |> String.capitalize()
