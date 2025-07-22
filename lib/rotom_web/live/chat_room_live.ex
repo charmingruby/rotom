@@ -1,11 +1,11 @@
 defmodule RotomWeb.ChatRoomLive do
-  alias RotomWeb.OnlineUsers
   use RotomWeb, :live_view
 
   alias Rotom.Accounts
   alias Rotom.Accounts.User
   alias Rotom.Chat
   alias Rotom.Chat.{Message, Room}
+  alias RotomWeb.OnlineUsers
 
   def render(assigns) do
     ~H"""
@@ -234,6 +234,8 @@ defmodule RotomWeb.ChatRoomLive do
       OnlineUsers.track(self(), socket.assigns.current_user)
     end
 
+    OnlineUsers.subscribe()
+
     socket =
       socket
       |> assign(rooms: rooms, users: users, timezone: timezone)
@@ -302,6 +304,12 @@ defmodule RotomWeb.ChatRoomLive do
       |> push_event("scroll_messages_to_bottom", %{})
 
     {:noreply, socket}
+  end
+
+  def handle_info(%{event: "presence_diff", payload: diff}, socket) do
+    online_users = OnlineUsers.update(socket.assigns.online_users, diff)
+
+    {:noreply, assign(socket, online_users: online_users)}
   end
 
   def handle_info({:message_deleted, message}, socket) do
