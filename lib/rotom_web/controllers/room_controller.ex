@@ -7,9 +7,9 @@ defmodule RotomWeb.RoomController do
     path =
       case Chat.list_joined_rooms(conn.assigns.current_user) do
         [] -> ~p"/rooms"
-        [first, _] -> ~p"/rooms/#{first}"
+        [first_room | _] -> ~p"/rooms/#{first_room.id}"
       end
 
-    redirect(conn, path)
+    redirect(conn, to: path)
   end
 end
