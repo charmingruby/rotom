@@ -22,6 +22,11 @@ defmodule RotomWeb.ChatRoomLive do
 
         <div id="rooms-list">
           <.room_link :for={room <- @rooms} room={room} active={room.id == @room.id} />
+
+          <button class="flex items-center peer h-8 text-sm pl-8 pr-3 hover:bg-slate-300 cursor-pointer w-full">
+            <.icon name="hero-plus" class="h-4 w-4 relative top-px" />
+            <span class="ml-2 leading-none">Add rooms</span>
+          </button>
         </div>
 
         <div>
@@ -114,7 +119,7 @@ defmodule RotomWeb.ChatRoomLive do
         />
       </div>
 
-      <div class="h-16 bg-white pb-4">
+      <div :if={@joined?} class="h-16 bg-white pb-4">
         <.form
           id="new-message-form"
           for={@new_message_form}
@@ -243,7 +248,7 @@ defmodule RotomWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
+    rooms = Chat.list_joined_rooms(socket.assigns.current_user)
 
     users = Accounts.list_users()
 
@@ -280,6 +285,7 @@ defmodule RotomWeb.ChatRoomLive do
       socket
       |> assign(
         room: room,
+        joined?: Chat.joined?(room, socket.assigns.current_user),
         page_title: "#" <> room.name
       )
       |> stream(:messages, messages, reset: true)
@@ -299,12 +305,16 @@ defmodule RotomWeb.ChatRoomLive do
     %{current_user: current_user, room: room} = socket.assigns
 
     socket =
-      case Chat.create_message(current_user, room, message_params) do
-        {:ok, _message} ->
-          assign_message_form(socket, Chat.change_message(%Message{}))
+      if Chat.joined?(room, current_user) do
+        case Chat.create_message(current_user, room, message_params) do
+          {:ok, _message} ->
+            assign_message_form(socket, Chat.change_message(%Message{}))
 
-        {:error, changeset} ->
-          assign_message_form(socket, changeset)
+          {:error, changeset} ->
+            assign_message_form(socket, changeset)
+        end
+      else
+        socket
       end
 
     {:noreply, socket}

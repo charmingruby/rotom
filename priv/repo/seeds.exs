@@ -15,7 +15,7 @@ import Ecto.Query
 alias Rotom.Repo
 alias Rotom.Accounts
 alias Rotom.Chat
-alias Rotom.Chat.{Message, Room}
+alias Rotom.Chat.{Message, Room, RoomMembership}
 
 names = [
   "Sunny",
@@ -37,19 +37,38 @@ chloe = Accounts.get_user_by_email("chloe@dummy.com")
 alvin = Accounts.get_user_by_email("alvin@dummy.com")
 slinky = Accounts.get_user_by_email("slinky@dummy.com")
 
+users = [
+  sunny,
+  chloe,
+  alvin,
+  slinky
+]
+
 rooms = [
   "General",
   "Trade",
   "Discussion",
-  "Advices"
+  "Advices",
+  "Changelog"
 ]
 
-for room <- rooms do
-  Chat.create_room(%{
-    name: String.downcase(room),
-    topic: String.capitalize(room) <> " topic"
-  })
-end
+Enum.with_index(rooms)
+|> Enum.map(fn {room_name, idx} ->
+  {:ok, room} =
+    Chat.create_room(%{
+      name: String.downcase(room_name),
+      topic: String.capitalize(room_name) <> " topic"
+    })
+
+  for user <- users do
+    if user != sunny or idx == 0 do
+      Repo.insert!(%RoomMembership{
+        room: room,
+        user: user
+      })
+    end
+  end
+end)
 
 room =
   Room

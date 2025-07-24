@@ -3,11 +3,14 @@ defmodule Rotom.Chat.Room do
 
   import Ecto.Changeset
 
-  alias Rotom.Chat.Message
+  alias Rotom.Accounts.User
+  alias Rotom.Chat.{Message, RoomMembership}
 
   schema "rooms" do
     field :name, :string
     field :topic, :string
+
+    many_to_many :members, User, join_through: RoomMembership
 
     has_many :messages, Message
 
