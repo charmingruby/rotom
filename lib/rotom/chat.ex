@@ -55,6 +55,17 @@ defmodule Rotom.Chat do
     |> Enum.sort_by(& &1.name)
   end
 
+  def list_rooms_with_joined(%User{} = user) do
+    query =
+      from r in Room,
+        left_join: m in RoomMembership,
+        on: r.id == m.room_id and m.user_id == ^user.id,
+        select: {r, not is_nil(m.id)},
+        order_by: [asc: :name]
+
+    Repo.all(query)
+  end
+
   def create_room(attrs) do
     %Room{}
     |> Room.changeset(attrs)
@@ -88,6 +99,18 @@ defmodule Rotom.Chat do
 
   def unsubscribe_from_room(%Room{} = room) do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
+  end
+
+  def toggle_room_membership(room, user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{} = membership ->
+        Repo.delete(membership)
+        {room, false}
+
+      nil ->
+        join_room!(room, user)
+        {room, true}
+    end
   end
 
   defp topic(room_id), do: "chat_room:#{room_id}"
