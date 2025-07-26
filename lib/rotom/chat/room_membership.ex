@@ -10,6 +10,8 @@ defmodule Rotom.Chat.RoomMembership do
     belongs_to :user, User
     belongs_to :room, Room
 
+    field :last_read_at, :utc_datetime
+
     timestamps(type: :utc_datetime)
   end
 

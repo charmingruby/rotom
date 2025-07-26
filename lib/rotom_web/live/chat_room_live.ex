@@ -111,13 +111,21 @@ defmodule RotomWeb.ChatRoomLive do
         phx-hook="RoomMessages"
         phx-update="stream"
       >
-        <.message
-          :for={{dom_id, message} <- @streams.messages}
-          current_user={@current_user}
-          dom_id={dom_id}
-          message={message}
-          timezone={@timezone}
-        />
+        <%= for {dom_id, message} <- @streams.messages do %>
+          <%= if message == :unread_marker do %>
+            <div id={dom_id} class="w-full flex text-red-500 items-center gap-3 pr-5">
+              <div class="w-full h-px grow bg-red-500"></div>
+              <div class="text-sm">New</div>
+            </div>
+          <% else %>
+            <.message
+              current_user={@current_user}
+              dom_id={dom_id}
+              message={message}
+              timezone={@timezone}
+            />
+          <% end %>
+        <% end %>
       </div>
 
       <div :if={@joined?} class="h-16 bg-white pb-4">
@@ -294,6 +302,12 @@ defmodule RotomWeb.ChatRoomLive do
       socket
       |> assign(rooms: rooms, users: users, timezone: timezone)
       |> assign(online_users: OnlineUsers.list())
+      |> stream_configure(:messages,
+        dom_id: fn
+          %Message{id: id} -> "messages-#{id}"
+          :unread_marker -> "messages-unread-marker"
+        end
+      )
 
     {:ok, socket}
   end
@@ -306,9 +320,15 @@ defmodule RotomWeb.ChatRoomLive do
       |> Map.fetch!("id")
       |> Chat.get_room!()
 
-    messages = Chat.list_messages_in_room(room)
+    last_read_at = Chat.get_last_read_at(room, socket.assigns.current_user)
+
+    messages =
+      room
+      |> Chat.list_messages_in_room()
+      |> maybe_insert_unread_marker(last_read_at)
 
     Chat.subscribe_to_room(room)
+    Chat.update_last_read_at(room, socket.assigns.current_user)
 
     socket =
       socket
@@ -368,6 +388,10 @@ defmodule RotomWeb.ChatRoomLive do
   end
 
   def handle_info({:new_message, message}, socket) do
+    if message.room_id == socket.assigns.room.id do
+      Chat.update_last_read_at(message.room, socket.assigns.current_user)
+    end
+
     socket =
       socket
       |> stream_insert(:messages, message)
@@ -388,6 +412,19 @@ defmodule RotomWeb.ChatRoomLive do
 
   defp assign_message_form(socket, changeset) do
     assign(socket, :new_message_form, to_form(changeset))
+  end
+
+  defp maybe_insert_unread_marker(messages, nil), do: messages
+
+  defp maybe_insert_unread_marker(messages, last_read_at) do
+    {read, unread} =
+      Enum.split_while(messages, &(DateTime.compare(&1.inserted_at, last_read_at) != :gt))
+
+    if unread == [] do
+      read
+    else
+      read ++ [:unread_marker | unread]
+    end
   end
 
   defp toggle_rooms do
