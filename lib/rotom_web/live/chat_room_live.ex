@@ -339,7 +339,7 @@ defmodule RotomWeb.ChatRoomLive do
           <span class="w-2 h-2 rounded-full border-2 border-gray-500"></span>
         <% end %>
       </div>
-      <span class="ml-2 leading-none">{@current_user.username}</span>
+      <span class="ml-2 leading-none">{@user.username}</span>
     </.link>
     """
   end
