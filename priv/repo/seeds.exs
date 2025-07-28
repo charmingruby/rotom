@@ -29,7 +29,12 @@ password = "dummypassword123"
 for name <- names do
   email = (name |> String.downcase()) <> "@dummy.com"
 
-  Accounts.register_user(%{email: email, password: password, password_confirmation: password})
+  Accounts.register_user(%{
+    username: name,
+    email: email,
+    password: password,
+    password_confirmation: password
+  })
 end
 
 sunny = Accounts.get_user_by_email("sunny@dummy.com")
