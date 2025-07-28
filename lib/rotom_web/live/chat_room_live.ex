@@ -1,6 +1,8 @@
 defmodule RotomWeb.ChatRoomLive do
   use RotomWeb, :live_view
 
+  import RotomWeb.RoomComponents
+
   alias Rotom.Accounts
   alias Rotom.Accounts.User
   alias Rotom.Chat
@@ -220,18 +222,7 @@ defmodule RotomWeb.ChatRoomLive do
     >
       <.header>New chat room</.header>
 
-      <.simple_form
-        for={@new_room_form}
-        id="room-form"
-        phx-change="validate-room"
-        phx-submit="save-room"
-      >
-        <.input field={@new_room_form[:name]} type="text" label="Name" phx-debounce />
-        <.input field={@new_room_form[:topic]} type="text" label="Topic" phx-debounce />
-        <:actions>
-          <.button phx-disable-with="Saving..." class="w-full">Save</.button>
-        </:actions>
-      </.simple_form>
+      <.room_form form={@new_room_form} />
     </.modal>
     """
   end
