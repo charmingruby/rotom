@@ -42,8 +42,6 @@ defmodule RotomWeb.Router do
   scope "/", RotomWeb do
     pipe_through [:browser]
 
-    get "/home", PageController, :home
-
     delete "/users/log_out", UserSessionController, :delete
 
     live_session :current_user,
