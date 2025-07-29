@@ -39,6 +39,20 @@ defmodule RotomWeb.Router do
     end
   end
 
+  scope "/", RotomWeb do
+    pipe_through [:browser]
+
+    get "/home", PageController, :home
+
+    delete "/users/log_out", UserSessionController, :delete
+
+    live_session :current_user,
+      on_mount: [{RotomWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserConfirmationLive, :edit
+      live "/users/confirm", UserConfirmationInstructionsLive, :new
+    end
+  end
+
   ## Authentication routes
 
   scope "/", RotomWeb do
@@ -68,18 +82,6 @@ defmodule RotomWeb.Router do
       live "/rooms/:id/edit", ChatRoomLive.Edit
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-    end
-  end
-
-  scope "/", RotomWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-
-    live_session :current_user,
-      on_mount: [{RotomWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 end
