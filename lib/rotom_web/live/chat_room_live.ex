@@ -233,7 +233,12 @@ defmodule RotomWeb.ChatRoomLive do
     </div>
 
     <%= if assigns[:profile] do %>
-      <.live_component id="profile" module={RotomWeb.ChatRoomLive.ProfileComponent} user={@profile} />
+      <.live_component
+        id="profile"
+        module={RotomWeb.ChatRoomLive.ProfileComponent}
+        user={@profile}
+        current_user={@current_user}
+      />
     <% end %>
 
     <.modal
@@ -391,6 +396,8 @@ defmodule RotomWeb.ChatRoomLive do
 
     OnlineUsers.subscribe()
 
+    Accounts.subscribe_to_user_avatars()
+
     Enum.each(rooms, fn {chat, _} -> Chat.subscribe_to_room(chat) end)
 
     socket =
@@ -541,6 +548,16 @@ defmodule RotomWeb.ChatRoomLive do
     {:noreply, stream_delete(socket, :messages, message)}
   end
 
+  def handle_info({:updated_avatar, user}, socket) do
+    socket =
+      socket
+      |> maybe_update_profile(user)
+      |> maybe_update_current_user(user)
+      |> push_event("update_avatar", %{user_id: user.id, avatar_path: user.avatar_path})
+
+    {:noreply, socket}
+  end
+
   defp assign_message_form(socket, changeset) do
     assign(socket, :new_message_form, to_form(changeset))
   end
@@ -558,6 +575,22 @@ defmodule RotomWeb.ChatRoomLive do
       read
     else
       read ++ [:unread_marker | unread]
+    end
+  end
+
+  defp maybe_update_current_user(socket, user) do
+    if socket.assigns.current_user.id == user.id do
+      assign(socket, :current_user, user)
+    else
+      socket
+    end
+  end
+
+  defp maybe_update_profile(socket, user) do
+    if socket.assigns[:profile] && socket.assigns.profile.id == user.id do
+      assign(socket, :profile, user)
+    else
+      socket
     end
   end
 
