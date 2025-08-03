@@ -36,6 +36,27 @@ defmodule RotomWeb.ChatRoomLive.FormComponent do
     {:noreply, socket}
   end
 
+  def handle_event("save-room", %{"room" => room_params}, socket) do
+    case Chat.create_room(room_params) do
+      {:ok, room} ->
+        Chat.join_room!(room, socket.assigns.current_user)
+
+        socket =
+          socket
+          |> put_flash(:info, "Created room")
+          |> push_navigate(to: ~p"/rooms/#{room}")
+
+        {:noreply, socket}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket =
+          socket
+          |> assign_form(changeset)
+
+        {:noreply, socket}
+    end
+  end
+
   defp assign_form(socket, changeset) do
     assign(socket, :form, to_form(changeset))
   end
