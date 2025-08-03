@@ -2,7 +2,7 @@ defmodule Rotom.Chat do
   import Ecto.{Changeset, Query}
 
   alias Rotom.Accounts.User
-  alias Rotom.Chat.{Message, Room, RoomMembership}
+  alias Rotom.Chat.{Message, Reply, Room, RoomMembership}
   alias Rotom.Repo
 
   @pubsub Rotom.PubSub
@@ -11,18 +11,30 @@ defmodule Rotom.Chat do
     Message
     |> where([m], m.room_id == ^id)
     |> order_by([m], asc: :inserted_at, asc: :id)
-    |> preload(:user)
+    |> preload_message_user_and_replies()
     |> Repo.all()
   end
 
   def create_message(user, room, attrs) do
     with {:ok, message} <-
-           %Message{user: user, room: room}
+           %Message{room: room, user: user, replies: []}
            |> Message.changeset(attrs)
            |> Repo.insert() do
       Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
 
       {:ok, message}
+    end
+  end
+
+  def delete_reply_by_id(id, %User{id: user_id}) do
+    with %Reply{} = reply <-
+           from(r in Reply, where: r.id == ^id and r.user_id == ^user_id)
+           |> Repo.one() do
+      Repo.delete(reply)
+
+      message = get_message!(reply.message_id)
+
+      Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:deleted_reply, message})
     end
   end
 
@@ -102,7 +114,7 @@ defmodule Rotom.Chat do
   def get_message!(id) do
     Message
     |> where([m], m.id == ^id)
-    |> preload(:user)
+    |> preload_message_user_and_replies()
     |> Repo.one!()
   end
 
@@ -161,6 +173,29 @@ defmodule Rotom.Chat do
       nil ->
         nil
     end
+  end
+
+  def change_reply(reply, attrs \\ %{}) do
+    Reply.changeset(reply, attrs)
+  end
+
+  def create_reply(%Message{} = message, attrs, user) do
+    with {:ok, reply} <-
+           %Reply{message: message, user: user}
+           |> Reply.changeset(attrs)
+           |> Repo.insert() do
+      message = get_message!(reply.message_id)
+
+      Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:new_reply, message})
+
+      {:ok, reply}
+    end
+  end
+
+  defp preload_message_user_and_replies(message_query) do
+    replies_query = from r in Reply, order_by: [asc: :inserted_at, asc: :id]
+
+    preload(message_query, [:user, replies: ^{replies_query, [:user]}])
   end
 
   defp topic(room_id), do: "chat_room:#{room_id}"

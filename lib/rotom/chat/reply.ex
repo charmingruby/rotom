@@ -1,24 +1,23 @@
-defmodule Rotom.Chat.Message do
+defmodule Rotom.Chat.Reply do
   use Ecto.Schema
+
+  alias Rotom.Accounts.User
+  alias Rotom.Chat.Message
 
   import Ecto.Changeset
 
-  alias Rotom.Accounts.User
-  alias Rotom.Chat.{Reply, Room}
-
-  schema "messages" do
+  schema "replies" do
     field :body, :string
 
-    belongs_to :room, Room
+    belongs_to :message, Message
     belongs_to :user, User
-    has_many :replies, Reply
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(message, attrs) do
-    message
+  def changeset(reply, attrs) do
+    reply
     |> cast(attrs, [:body])
     |> validate_required([:body])
   end

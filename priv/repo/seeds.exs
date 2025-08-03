@@ -10,12 +10,11 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-import Ecto.Query
-
 alias Rotom.Repo
 alias Rotom.Accounts
+alias Rotom.Accounts.User
 alias Rotom.Chat
-alias Rotom.Chat.{Message, Room, RoomMembership}
+alias Rotom.Chat.{Message, Reply, Room, RoomMembership}
 
 names = [
   "Sunny",
@@ -77,9 +76,7 @@ end)
 
 room =
   Room
-  |> order_by([r], asc: r.inserted_at)
-  |> limit(1)
-  |> Repo.one()
+  |> Repo.get_by!(name: List.first(rooms) |> String.downcase())
 
 for {user, message} <- [
       {
@@ -104,4 +101,28 @@ for {user, message} <- [
     room: room,
     body: message
   })
+end
+
+users = Repo.all(User)
+
+now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+room =
+  Room
+  |> Repo.get_by!(name: List.first(rooms) |> String.downcase())
+  |> Repo.preload(:messages)
+
+for message <- room.messages do
+  num_replies = :rand.uniform(4) - 1
+
+  if num_replies > 0 do
+    for _ <- 0..num_replies do
+      Repo.insert!(%Reply{
+        user: Enum.random(users),
+        message: message,
+        body: "dummy body",
+        inserted_at: DateTime.add(now, :rand.uniform(10), :minute)
+      })
+    end
+  end
 end

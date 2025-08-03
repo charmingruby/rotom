@@ -250,6 +250,7 @@ defmodule RotomWeb.ChatRoomLive do
         current_user={@current_user}
         message={@thread}
         room={@room}
+        joined?={@joined?}
         timezone={@timezone}
       />
     <% end %>
@@ -445,8 +446,14 @@ defmodule RotomWeb.ChatRoomLive do
     {:noreply, socket}
   end
 
-  def handle_event("delete-message", %{"id" => id}, socket) do
+  def handle_event("delete-message", %{"id" => id, "type" => "Message"}, socket) do
     Chat.delete_message_by_id(id, socket.assigns.current_user)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("delete-message", %{"id" => id, "type" => "Reply"}, socket) do
+    Chat.delete_reply_by_id(id, socket.assigns.current_user)
 
     {:noreply, socket}
   end
@@ -517,6 +524,14 @@ defmodule RotomWeb.ChatRoomLive do
     {:noreply, socket}
   end
 
+  def handle_info({:deleted_reply, message}, socket) do
+    socket =
+      socket
+      |> refresh_message(message)
+
+    {:noreply, socket}
+  end
+
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
     online_users = OnlineUsers.update(socket.assigns.online_users, diff)
 
@@ -537,8 +552,32 @@ defmodule RotomWeb.ChatRoomLive do
     {:noreply, socket}
   end
 
+  def handle_info({:new_reply, message}, socket) do
+    if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
+      push_event(socket, "scroll_thread_to_bottom", %{})
+    else
+      socket
+    end
+
+    {:noreply, socket}
+  end
+
   defp assign_message_form(socket, changeset) do
     assign(socket, :new_message_form, to_form(changeset))
+  end
+
+  defp refresh_message(socket, message) do
+    if message.room_id == socket.assigns.room.id do
+      socket = stream_insert(socket, :messages, message)
+
+      if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
+        assign(socket, :thread, message)
+      else
+        socket
+      end
+    else
+      socket
+    end
   end
 
   defp maybe_insert_unread_marker(messages, nil), do: messages
