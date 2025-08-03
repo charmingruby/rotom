@@ -8,12 +8,16 @@ defmodule Rotom.Chat do
   @pubsub Rotom.PubSub
   @room_page_size 10
 
-  def list_messages_in_room(%Room{id: id}) do
+  def list_messages_in_room(%Room{id: room_id}, opts \\ []) do
     Message
-    |> where([m], m.room_id == ^id)
-    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> where([m], m.room_id == ^room_id)
+    |> order_by([m], desc: :inserted_at, desc: :id)
     |> preload_message_user_and_replies()
-    |> Repo.all()
+    |> Repo.paginate(
+      after: opts[:after],
+      limit: 50,
+      cursor_fields: [inserted_at: :desc, id: :desc]
+    )
   end
 
   def create_message(user, room, attrs) do
