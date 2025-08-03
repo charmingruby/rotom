@@ -20,7 +20,7 @@ defmodule RotomWeb.ChatRoomLive.ProfileComponent do
       </div>
       <div class="flex flex-col grow overflow-auto p-4">
         <div class="mb-4">
-          <img src={~p"/images/dummy-avatar.jpg"} class="w-48 rounded mx-auto" />
+          <img src={~p"/uploads/dummy-avatar.jpg"} class="w-48 rounded mx-auto" />
         </div>
         <h2 class="text-xl font-bold text-gray-800">
           {@user.username}
