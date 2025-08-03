@@ -7,6 +7,8 @@ defmodule RotomWeb.ChatRoomLive do
   alias Rotom.Chat.{Message, Room}
   alias RotomWeb.OnlineUsers
 
+  import RotomWeb.UserComponents
+
   def render(assigns) do
     ~H"""
     <div class="flex flex-col shrink-0 w-64 bg-slate-100">
@@ -101,7 +103,7 @@ defmodule RotomWeb.ChatRoomLive do
                   phx-click="show-profile"
                   phx-value-user-id={@current_user.id}
                 >
-                  <img src={~p"/uploads/dummy-avatar.jpg"} class="h-8 w-8 rounded" />
+                  <.user_avatar user={@current_user} class="h-8 w-8 rounded" />
                   <span class="hover:underline">{@current_user.username}</span>
                 </.link>
               </div>
@@ -291,11 +293,11 @@ defmodule RotomWeb.ChatRoomLive do
         <.icon name="hero-trash" class="h-4 w-4" />
       </button>
 
-      <img
+      <.user_avatar
+        user={@message.user}
         class="h-10 w-10 rounded cursor-pointer"
         phx-click="show-profile"
         phx-value-user-id={@message.user.id}
-        src={user_avatar_path(@message.user)}
       />
 
       <div class="ml-2">
@@ -594,16 +596,6 @@ defmodule RotomWeb.ChatRoomLive do
       rem(day, 10) == 2 and day != 12 -> "nd"
       rem(day, 10) == 3 and day != 13 -> "rd"
       true -> "th"
-    end
-  end
-
-  defp user_avatar_path(user) do
-    IO.inspect(user)
-
-    if user.avatar_path do
-      ~p"/uploads/#{user.avatar_path}"
-    else
-      ~p"/images/default-avatar.png"
     end
   end
 

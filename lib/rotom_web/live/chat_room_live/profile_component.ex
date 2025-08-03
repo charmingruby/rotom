@@ -1,6 +1,8 @@
 defmodule RotomWeb.ChatRoomLive.ProfileComponent do
   use RotomWeb, :live_component
 
+  import RotomWeb.UserComponents
+
   def render(assigns) do
     ~H"""
     <div class="flex flex-col shrink-0 w-1/4 max-w-xs bg-white shadow-xl">
@@ -20,7 +22,7 @@ defmodule RotomWeb.ChatRoomLive.ProfileComponent do
       </div>
       <div class="flex flex-col grow overflow-auto p-4">
         <div class="mb-4">
-          <img src={~p"/uploads/dummy-avatar.jpg"} class="w-48 rounded mx-auto" />
+          <.user_avatar user={@user} class="w-48 rounded mx-auto" />
         </div>
         <h2 class="text-xl font-bold text-gray-800">
           {@user.username}
