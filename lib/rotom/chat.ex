@@ -99,6 +99,13 @@ defmodule Rotom.Chat do
     Repo.insert!(%RoomMembership{room: room, user: user})
   end
 
+  def get_message!(id) do
+    Message
+    |> where([m], m.id == ^id)
+    |> preload(:user)
+    |> Repo.one!()
+  end
+
   def joined?(%Room{} = room, %User{} = user) do
     Repo.exists?(
       from rm in RoomMembership,
